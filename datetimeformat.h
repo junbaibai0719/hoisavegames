@@ -1,0 +1,5 @@
+#ifndef DATETIMEFORMAT_H
+#define DATETIME_NORMAL_FORMAT "yyyy年MM月dd日 HH_mm_ss"
+#define DATETIMEFORMAT_H
+
+#endif // DATETIMEFORMAT_H
