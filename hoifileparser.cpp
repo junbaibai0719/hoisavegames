@@ -41,10 +41,12 @@ QProcess* HoiFileParser::restore(HoiSaveNode *saveNode)
     QString srcPath = saveNode->srcPath();
     QString dstPath = saveNode->filePath();
     QProcess *process = new QProcess(QCoreApplication::instance());
-    process->startCommand(QString("%1/7z/7za.exe  e  \"%2\" -o\"%3\" -y").arg(
-                              QCoreApplication::applicationDirPath(),
-                              dstPath, QFileInfo(srcPath).dir().path()
-                          ));
+    QString cmd = QString("%1/7z/7za.exe  e  \"%2\" -o\"%3\" -y").arg(
+                      QCoreApplication::applicationDirPath(),
+                      dstPath, QFileInfo(srcPath).dir().path()
+                  );
+    qInfo() <<  "run command:" << cmd;
+    process->startCommand(cmd);
     return process;
 }
 

@@ -3,6 +3,7 @@
 #include <QSqlQuery>
 #include <QFile>
 #include <QSqlError>
+
 #include "hoifileparser.h"
 
 HoiModel::HoiModel(QObject *parent): QAbstractItemModel(parent)
@@ -12,7 +13,6 @@ HoiModel::HoiModel(QObject *parent): QAbstractItemModel(parent)
     m_db.open();
     qInfo() << "db is open?:" << m_db.isOpen();
     createTable();
-    initData();
 }
 
 
@@ -24,8 +24,10 @@ void HoiModel::initData()
                   "from save_node "
                   "where src_path = ? "
                   "order by depth asc");
-    query.addBindValue("C:\\Users\\lin\\Documents\\Paradox Interactive\\Hearts of Iron IV\\save games\\  1.hoi4");
+    query.addBindValue(currentFileName());
     if(query.exec()) {
+        beginResetModel();
+        m_rows.clear();
         int lastDepth = 0;
         QList<HoiSaveNode*> * saveNodes = new QList<HoiSaveNode*>();
         m_rows.append(saveNodes);
@@ -33,6 +35,9 @@ void HoiModel::initData()
         while (query.next()) {
             int depth = query.value(12).toInt();
             if(depth > lastDepth) {
+                std::sort(saveNodes->begin(), saveNodes->end(), [](HoiSaveNode * node0, HoiSaveNode * node1) {
+                    return node0->parentId() < node1->parentId();
+                });
                 saveNodes = new QList<HoiSaveNode*>();
                 m_rows.append(saveNodes);
                 lastDepth = depth;
@@ -62,6 +67,7 @@ void HoiModel::initData()
                 node
             );
         }
+        endResetModel();
     } else {
         qWarning() << query.lastError();
     }
@@ -101,7 +107,7 @@ void HoiModel::addSaveNodeFromPath(const QString &path)
 {
     HoiSaveNode* savenode = HoiFileParser::parse("C:\\Users\\lin\\Documents\\Paradox Interactive\\Hearts of Iron IV\\save games\\  1.hoi4");
     QProcess * process = HoiFileParser::save(savenode);
-    QObject::connect(process, &QProcess::finished, process, [ = ]() {
+    QObject::connect(process, &QProcess::finished, process, [ =, this ]() {
         if(process->exitCode()) {
             qWarning() << process->readAllStandardError();
             process->close();
@@ -155,10 +161,39 @@ QList<QString> HoiModel::listeningFiles()
     QList<QString> resList;
     if(query.exec()) {
         while (query.next()) {
-            resList.append(QFileInfo(query.value(0).toString()).fileName());
+            resList.append(query.value(0).toString());
         }
     }
     return resList;
+}
+
+void HoiModel::restore(HoiSaveNode *node)
+{
+    setRestoring(true);
+    QProcess* process = HoiFileParser::restore(node);
+    QObject::connect(process, &QProcess::finished, process, [ =, this ]() {
+        if(process->exitCode()) {
+            qWarning() << process->readAllStandardError();
+            emit notify("回档失败", "解压文件失败" + process->readAllStandardError());
+            process->close();
+            process->deleteLater();
+            setRestoring(false);
+            return;
+        }
+        process->close();
+        process->deleteLater();
+        QSqlQuery query;
+        query.prepare("update save_node set update_time=? where id=?");
+        query.addBindValue(QDateTime::currentDateTime());
+        query.addBindValue(node->id());
+        if(!query.exec()) {
+            qCritical() << "update update_time failed";
+            emit notify("回档失败", "");
+        } else {
+            emit notify("回档成功", "");
+        };
+        setRestoring(false);
+    });
 }
 
 QModelIndex HoiModel::index(int row, int column, const QModelIndex &parent) const
@@ -194,3 +229,32 @@ QVariant HoiModel::data(const QModelIndex &index, int role) const
     return data;
 }
 
+
+QString HoiModel::currentFileName() const
+{
+    return m_currentFileName;
+}
+
+void HoiModel::setCurrentFileName(const QString &newCurrentFileName)
+{
+    if (m_currentFileName == newCurrentFileName) {
+        return;
+    }
+    m_currentFileName = newCurrentFileName;
+    emit currentFileNameChanged();
+    initData();
+}
+
+bool HoiModel::restoring() const
+{
+    return m_restoring;
+}
+
+void HoiModel::setRestoring(bool newRestoring)
+{
+    if (m_restoring == newRestoring) {
+        return;
+    }
+    m_restoring = newRestoring;
+    emit restoringChanged();
+}

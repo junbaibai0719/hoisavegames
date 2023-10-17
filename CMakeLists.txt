@@ -18,7 +18,7 @@ qt_add_executable(apphoisavegames
 qt_add_qml_module(apphoisavegames
     URI hoisavegames
     VERSION 1.0
-    QML_FILES Main.qml
+    QML_FILES Main.qml Message.qml
     SOURCES
         hoisavenode.h hoisavenode.cpp
         hoimodel.h hoimodel.cpp
