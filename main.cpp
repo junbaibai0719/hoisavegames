@@ -12,6 +12,7 @@ int main(int argc, char *argv[])
     app.setOrganizationDomain("Junbaibai");
     app.setApplicationName("hoisavegames");
     QObject::connect(&app, &QGuiApplication::aboutToQuit, &app, [ = ]() {
+        qDebug() << 1111;
         for (QObject *obj : QCoreApplication::instance()->children()) {
             if("QProcess" == QString(obj->metaObject()->className())) {
                 QProcess * process = (QProcess*)obj;

@@ -26,6 +26,7 @@ qt_add_qml_module(apphoisavegames
         savegamelistener.h savegamelistener.cpp
         hoifileparser.h hoifileparser.cpp
         datetimeformat.h
+        line.h line.cpp
 )
 
 qt_add_resources(apphoisavegames "configuration"

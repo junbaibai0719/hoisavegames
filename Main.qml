@@ -50,8 +50,10 @@ ApplicationWindow {
             console.log(windowSettings.listeningFolder)
         }
     }
+
     SplitView {
         anchors.fill: parent
+        //        visible: false
         Rectangle {
             implicitWidth: 60
             ListView {
@@ -75,34 +77,75 @@ ApplicationWindow {
         }
 
         Rectangle {
+            id: treeContainer
             implicitWidth: parent.width - 60
             ListView {
-                anchors.fill: parent
                 id: treeList
+                anchors.fill: parent
                 model: HoiModel {
                     id: hoiModel
                 }
-                delegate: RowLayout {
-                    width: treeList.width
-                    Repeater {
-                        model: display
-                        Rectangle {
-                            implicitHeight: dateText.height + 10
-                            implicitWidth: dateText.width + 10
-                            border.color: "#eee"
-                            border.width: 2
-                            radius: 3
-                            Layout.alignment: Qt.AlignHCenter
-                            Text {
-                                id: dateText
-                                anchors.centerIn: parent
-                                text: qsTr(modelData.date)
-                                Component.onCompleted: {
-                                    if (modelData.parentNode) {
-                                        console.log(modelData.parentNode.date)
+                spacing: 10
+                clip: true
+                property var linePos: ({})
+                signal linePosAdd
+
+                delegate: Rectangle {
+                    implicitWidth: treeContainer.width
+                    implicitHeight: 30
+                    RowLayout {
+                        implicitWidth: display.length * 100
+                        anchors.centerIn: parent
+                        spacing: 30
+                        Repeater {
+                            model: display
+                            Rectangle {
+                                height: dateText.height + 10
+                                width: dateText.width + 10
+                                border.color: "#eee"
+                                border.width: 2
+                                radius: 3
+                                Layout.alignment: Qt.AlignHCenter
+
+                                Line {
+                                    id: line
+                                    anchors.horizontalCenter: parent.horizontalCenter
+                                    onScenePosChanged: {
+                                        treeList.linePos[modelData.id + ""]
+                                                = [scenePos, Qt.point(
+                                                       parent.width,
+                                                       parent.height)]
+                                        treeList.linePosAdd()
                                     }
-                                    console.log(modelData.children)
-                                    console.log(modelData.parentNode)
+                                    Connections {
+                                        target: treeList
+                                        function onLinePosAdd() {
+                                            if (!modelData.parentNode) {
+                                                return
+                                            }
+
+                                            var rect = treeList.linePos[modelData.parentNode.id
+                                                                        + ""]
+                                            if (!rect) {
+                                                return
+                                            }
+
+                                            var pos = rect[0]
+                                            var wh = rect[1]
+                                            line.relativeX = pos.x - line.scenePos.x
+                                            line.relativeY = (pos.y + wh.y) - line.scenePos.y
+                                        }
+                                    }
+                                }
+                                Text {
+                                    id: dateText
+                                    anchors.centerIn: parent
+                                    text: qsTr(modelData.date)
+                                    Component.onCompleted: {
+                                        if (modelData.parentNode) {
+                                            console.log(modelData.parentNode.date)
+                                        }
+                                    }
                                 }
                             }
                         }
