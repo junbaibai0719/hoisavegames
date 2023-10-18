@@ -124,7 +124,7 @@ void HoiModel::addSaveNodeFromPath(const QString &path)
     QProcess * process = HoiFileParser::save(savenode);
     QObject::connect(process, &QProcess::finished, process, [ =, this ]() {
         if(process->exitCode()) {
-            qWarning() << process->readAllStandardError();
+            qWarning() << QString::fromLocal8Bit(process->readAllStandardError());
             qInfo() << "save failed remove file:" << QDir(savenode->filePath()).remove(savenode->filePath());
             process->close();
             process->deleteLater();
@@ -180,7 +180,7 @@ void HoiModel::restore(HoiSaveNode *node)
     QProcess* process = HoiFileParser::restore(node);
     QObject::connect(process, &QProcess::finished, process, [ =, this ]() {
         if(process->exitCode()) {
-            qWarning() << process->readAllStandardError();
+            qWarning() << QString::fromLocal8Bit(process->readAllStandardError());
             emit notify("回档失败", "解压文件失败" + process->readAllStandardError());
             process->close();
             process->deleteLater();
