@@ -51,6 +51,7 @@ void SaveGameListener::onfileChanged(const QString &path)
 //    qDebug() << QFileInfo(path).lastModified().msecsTo(QDateTime::currentDateTime());
 //    if(QFileInfo(path).lastModified().msecsTo(QDateTime::currentDateTime()) > 0) {
     emit this->fileChanged(path);
+    qInfo() << "file change:" << path;
 //    }
 }
 
@@ -68,5 +69,6 @@ void SaveGameListener::onDirectoryChanged(const QString &path)
             continue;
         }
         qInfo() << "add file: " << path << " : " << m_fileWatcher->addPath(fileInfoList.at(i).filePath());
+        emit this->fileChanged(fileInfoList.at(i).filePath());
     }
 }

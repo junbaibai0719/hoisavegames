@@ -11,8 +11,11 @@ find_package(Qt6 6.4 REQUIRED COMPONENTS Quick Sql)
 
 qt_standard_project_setup()
 
+set(app_icon_resource_windows "${CMAKE_CURRENT_SOURCE_DIR}/resources/resource.rc")
+
 qt_add_executable(apphoisavegames
     main.cpp
+    ${app_icon_resource_windows}
 )
 
 qt_add_qml_module(apphoisavegames
@@ -27,6 +30,7 @@ qt_add_qml_module(apphoisavegames
         hoifileparser.h hoifileparser.cpp
         datetimeformat.h
         line.h line.cpp
+    RESOURCES resources/icon/hoiSaveGamesLogo.ico
 )
 
 qt_add_resources(apphoisavegames "configuration"

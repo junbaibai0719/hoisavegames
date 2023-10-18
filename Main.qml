@@ -59,12 +59,15 @@ ApplicationWindow {
     SplitView {
         anchors.fill: parent
         anchors.topMargin: 10
-        //        visible: false
+
         Rectangle {
             implicitWidth: 60
             ListView {
                 id: fileNameList
                 anchors.fill: parent
+                clip: true
+                ScrollBar.vertical: ScrollBar {}
+
                 model: hoiModel.listeningFiles()
                 signal cleanSelected
                 TapHandler {
@@ -76,8 +79,8 @@ ApplicationWindow {
                 delegate: Rectangle {
                     id: fileNameRect
 
-                    implicitHeight: fileNameText.height+5
-                    implicitWidth: fileNameList.width+10
+                    implicitHeight: fileNameText.height + 5
+                    implicitWidth: fileNameList.width + 10
                     border.color: "#eee"
                     border.width: 2
                     radius: 3
@@ -154,6 +157,8 @@ ApplicationWindow {
 
                 spacing: 10
                 clip: true
+                ScrollBar.vertical: ScrollBar {}
+
                 property var linePos: ({})
                 signal linePosAdd
                 signal cleanSelected
@@ -205,7 +210,7 @@ ApplicationWindow {
                                     y: (parent.height - height) / 2
                                     width: parent.width * 0.7
                                     modal: false
-                                    closePolicy: Dialog.NoAutoClose|Dialog.CloseOnEscape
+                                    closePolicy: Dialog.NoAutoClose | Dialog.CloseOnEscape
                                     header: Rectangle {
                                         width: parent.width
                                         height: 20

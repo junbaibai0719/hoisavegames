@@ -13,6 +13,7 @@ HoiModel::HoiModel(QObject *parent): QAbstractItemModel(parent)
     m_db.open();
     qInfo() << "db is open?:" << m_db.isOpen();
     createTable();
+    m_restoring = false;
 }
 
 
@@ -105,7 +106,7 @@ void HoiModel::createTable()
 
 void HoiModel::addSaveNodeFromPath(const QString &path)
 {
-    HoiSaveNode* savenode = HoiFileParser::parse("C:\\Users\\lin\\Documents\\Paradox Interactive\\Hearts of Iron IV\\save games\\  1.hoi4");
+    HoiSaveNode* savenode = HoiFileParser::parse(path);
     QProcess * process = HoiFileParser::save(savenode);
     QObject::connect(process, &QProcess::finished, process, [ =, this ]() {
         if(process->exitCode()) {
@@ -126,6 +127,7 @@ void HoiModel::addSaveNodeFromPath(const QString &path)
         int id = selectLastUpdateNode.value(0).toInt();
         int depth = selectLastUpdateNode.value(2).toInt();
         QString date = selectLastUpdateNode.value(1).toString();
+        qDebug() << date << savenode->date();
         if(date == savenode->date()) {
             qDebug() << "not need insert";
             return;
