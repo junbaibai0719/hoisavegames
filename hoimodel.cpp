@@ -14,6 +14,7 @@ HoiModel::HoiModel(QObject *parent): QAbstractItemModel(parent)
     qInfo() << "db is open?:" << m_db.isOpen();
     createTable();
     m_restoring = false;
+    initListeningFiles();
 }
 
 
@@ -104,6 +105,19 @@ void HoiModel::createTable()
     qDebug() << sql.lastError();
 }
 
+void HoiModel::initListeningFiles()
+{
+    QSqlQuery query;
+    query.prepare("select src_path from save_node group by src_path order by id ");
+    QList<QString> resList;
+    if(query.exec()) {
+        while (query.next()) {
+            resList.append(query.value(0).toString());
+        }
+    }
+    setListeningFiles(resList);
+}
+
 void HoiModel::addSaveNodeFromPath(const QString &path)
 {
     HoiSaveNode* savenode = HoiFileParser::parse(path);
@@ -111,6 +125,7 @@ void HoiModel::addSaveNodeFromPath(const QString &path)
     QObject::connect(process, &QProcess::finished, process, [ =, this ]() {
         if(process->exitCode()) {
             qWarning() << process->readAllStandardError();
+            qInfo() << "save failed remove file:" << QDir(savenode->filePath()).remove(savenode->filePath());
             process->close();
             process->deleteLater();
             return;
@@ -152,22 +167,12 @@ void HoiModel::addSaveNodeFromPath(const QString &path)
             qWarning() << "insert save_node error:" << query.lastError();
         } else {
             qInfo() << "insert success";
+            initListeningFiles();
+            initData();
         }
     });
 }
 
-QList<QString> HoiModel::listeningFiles()
-{
-    QSqlQuery query;
-    query.prepare("select src_path from save_node group by src_path order by id ");
-    QList<QString> resList;
-    if(query.exec()) {
-        while (query.next()) {
-            resList.append(query.value(0).toString());
-        }
-    }
-    return resList;
-}
 
 void HoiModel::restore(HoiSaveNode *node)
 {
@@ -259,4 +264,18 @@ void HoiModel::setRestoring(bool newRestoring)
     }
     m_restoring = newRestoring;
     emit restoringChanged();
+}
+
+QList<QString> HoiModel::listeningFiles() const
+{
+    return m_listeningFiles;
+}
+
+void HoiModel::setListeningFiles(const QList<QString> &newListeningFiles)
+{
+    if (m_listeningFiles == newListeningFiles) {
+        return;
+    }
+    m_listeningFiles = newListeningFiles;
+    emit listeningFilesChanged();
 }

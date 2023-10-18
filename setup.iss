@@ -26,7 +26,7 @@ ChangesAssociations=yes
 DisableProgramGroupPage=yes
 LicenseFile=E:\Documents\qt_project\hoisavegames\LICENSE
 ; Uncomment the following line to run in non administrative install mode (install for current user only.)
-;PrivilegesRequired=lowest
+PrivilegesRequired=lowest
 OutputDir=.\dist
 OutputBaseFilename={#MyAppName}_{#MyAppVersion}
 SetupIconFile=E:\Documents\qt_project\hoisavegames\resources\icon\hoiSaveGamesLogo.ico

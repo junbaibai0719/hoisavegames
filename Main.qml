@@ -68,7 +68,7 @@ ApplicationWindow {
                 clip: true
                 ScrollBar.vertical: ScrollBar {}
 
-                model: hoiModel.listeningFiles()
+                model: hoiModel.listeningFiles
                 signal cleanSelected
                 TapHandler {
                     onTapped: {
@@ -112,7 +112,7 @@ ApplicationWindow {
                         id: fileNameText
                         anchors.centerIn: parent
                         text: modelData.substring(modelData.lastIndexOf(
-                                                      "／") + 1)
+                                                      "/") + 1)
                     }
                     MouseArea {
                         anchors.fill: parent
@@ -129,6 +129,7 @@ ApplicationWindow {
                             }
                         }
                         onPressed: {
+                            fileNameList.cleanSelected()
                             fileNameRect.state = "selected"
                             hoiModel.currentFileName = modelData
                         }
@@ -152,6 +153,9 @@ ApplicationWindow {
                                                                 "informativeText": msg
                                                             })
                         dialog.open()
+                    }
+                    onListeningFilesChanged: {
+                        console.log(listeningFiles)
                     }
                 }
 
