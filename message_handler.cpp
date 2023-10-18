@@ -50,7 +50,7 @@ void messageHandler(QtMsgType type, const QMessageLogContext &context, const QSt
     QString strMessage = QString("%1 %2 %3 %4").arg(strDateTime, contextInfo, msgType, msg);
     std::cout << strMessage.toStdString() << std::endl;
     QString logFilePath(QCoreApplication::instance()->applicationDirPath() + "/log/"  + QString(QDateTime::currentDateTime().toString("yyyy-MM-dd").append(".log")));
-    std::cout << QDir(QFileInfo(logFilePath).path()).mkpath("log");
+    std::cout << QDir(QFileInfo(logFilePath).path()).mkpath(QFileInfo(logFilePath).path());
     QFile file(logFilePath);
     file.open(QIODevice::ReadWrite | QIODevice::Append);
     QTextStream stream(&file);
