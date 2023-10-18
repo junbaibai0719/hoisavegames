@@ -5,6 +5,7 @@
 #include <QThread>
 #include <QProcess>
 #include <QDateTime>
+#include <QtCore>
 
 /**
  *  日志写入文件，保留输出到控制台功能
@@ -48,7 +49,9 @@ void messageHandler(QtMsgType type, const QMessageLogContext &context, const QSt
     QString strDateTime = QDateTime::currentDateTime().toString("yyyy-MM-dd hh:mm:ss.zzz");
     QString strMessage = QString("%1 %2 %3 %4").arg(strDateTime, contextInfo, msgType, msg);
     std::cout << strMessage.toStdString() << std::endl;
-    QFile file(QString(QDateTime::currentDateTime().toString("yyyy-MM-dd").append(".log")));
+    QString logFilePath(QCoreApplication::instance()->applicationDirPath() + "/log/"  + QString(QDateTime::currentDateTime().toString("yyyy-MM-dd").append(".log")));
+    std::cout << QDir(QFileInfo(logFilePath).path()).mkpath(QFileInfo(logFilePath).path());
+    QFile file(logFilePath);
     file.open(QIODevice::ReadWrite | QIODevice::Append);
     QTextStream stream(&file);
     stream << strMessage << "\r\n";

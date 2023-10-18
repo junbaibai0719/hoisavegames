@@ -13,15 +13,16 @@ class HoiModel: public QAbstractItemModel
     QML_ELEMENT
     Q_PROPERTY(QString currentFileName READ currentFileName WRITE setCurrentFileName NOTIFY currentFileNameChanged FINAL)
     Q_PROPERTY(bool restoring READ restoring WRITE setRestoring NOTIFY restoringChanged FINAL)
+    Q_PROPERTY(QList<QString> listeningFiles READ listeningFiles WRITE setListeningFiles NOTIFY listeningFilesChanged FINAL)
 public:
     HoiModel(QObject *parent = nullptr);
 private:
     void initData();
     void createTable();
+    void initListeningFiles();
 
 public slots:
     void addSaveNodeFromPath(const QString &path);
-    QList<QString> listeningFiles();
     void restore(HoiSaveNode * node);
 
 private:
@@ -32,6 +33,8 @@ private:
     QString m_currentFileName;
 
     bool m_restoring;
+
+    QList<QString> m_listeningFiles;
 
 public:
     QModelIndex index(int row, int column, const QModelIndex &parent) const;
@@ -46,10 +49,14 @@ public:
     bool restoring() const;
     void setRestoring(bool newRestoring);
 
+    QList<QString> listeningFiles() const;
+    void setListeningFiles(const QList<QString> &newListeningFiles);
+
 signals:
     void currentFileNameChanged();
     void restoringChanged();
     void notify(const QString & title, const QString & msg);
+    void listeningFilesChanged();
 };
 
 #endif // HOIMODEL_H

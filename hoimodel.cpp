@@ -13,6 +13,8 @@ HoiModel::HoiModel(QObject *parent): QAbstractItemModel(parent)
     m_db.open();
     qInfo() << "db is open?:" << m_db.isOpen();
     createTable();
+    m_restoring = false;
+    initListeningFiles();
 }
 
 
@@ -103,13 +105,27 @@ void HoiModel::createTable()
     qDebug() << sql.lastError();
 }
 
+void HoiModel::initListeningFiles()
+{
+    QSqlQuery query;
+    query.prepare("select src_path from save_node group by src_path order by id ");
+    QList<QString> resList;
+    if(query.exec()) {
+        while (query.next()) {
+            resList.append(query.value(0).toString());
+        }
+    }
+    setListeningFiles(resList);
+}
+
 void HoiModel::addSaveNodeFromPath(const QString &path)
 {
-    HoiSaveNode* savenode = HoiFileParser::parse("C:\\Users\\lin\\Documents\\Paradox Interactive\\Hearts of Iron IV\\save games\\  1.hoi4");
+    HoiSaveNode* savenode = HoiFileParser::parse(path);
     QProcess * process = HoiFileParser::save(savenode);
     QObject::connect(process, &QProcess::finished, process, [ =, this ]() {
         if(process->exitCode()) {
-            qWarning() << process->readAllStandardError();
+            qWarning() << QString::fromLocal8Bit(process->readAllStandardError());
+            qInfo() << "save failed remove file:" << QDir(savenode->filePath()).remove(savenode->filePath());
             process->close();
             process->deleteLater();
             return;
@@ -126,6 +142,7 @@ void HoiModel::addSaveNodeFromPath(const QString &path)
         int id = selectLastUpdateNode.value(0).toInt();
         int depth = selectLastUpdateNode.value(2).toInt();
         QString date = selectLastUpdateNode.value(1).toString();
+        qDebug() << date << savenode->date();
         if(date == savenode->date()) {
             qDebug() << "not need insert";
             return;
@@ -150,22 +167,12 @@ void HoiModel::addSaveNodeFromPath(const QString &path)
             qWarning() << "insert save_node error:" << query.lastError();
         } else {
             qInfo() << "insert success";
+            initListeningFiles();
+            initData();
         }
     });
 }
 
-QList<QString> HoiModel::listeningFiles()
-{
-    QSqlQuery query;
-    query.prepare("select src_path from save_node group by src_path order by id ");
-    QList<QString> resList;
-    if(query.exec()) {
-        while (query.next()) {
-            resList.append(query.value(0).toString());
-        }
-    }
-    return resList;
-}
 
 void HoiModel::restore(HoiSaveNode *node)
 {
@@ -173,7 +180,7 @@ void HoiModel::restore(HoiSaveNode *node)
     QProcess* process = HoiFileParser::restore(node);
     QObject::connect(process, &QProcess::finished, process, [ =, this ]() {
         if(process->exitCode()) {
-            qWarning() << process->readAllStandardError();
+            qWarning() << QString::fromLocal8Bit(process->readAllStandardError());
             emit notify("回档失败", "解压文件失败" + process->readAllStandardError());
             process->close();
             process->deleteLater();
@@ -257,4 +264,18 @@ void HoiModel::setRestoring(bool newRestoring)
     }
     m_restoring = newRestoring;
     emit restoringChanged();
+}
+
+QList<QString> HoiModel::listeningFiles() const
+{
+    return m_listeningFiles;
+}
+
+void HoiModel::setListeningFiles(const QList<QString> &newListeningFiles)
+{
+    if (m_listeningFiles == newListeningFiles) {
+        return;
+    }
+    m_listeningFiles = newListeningFiles;
+    emit listeningFilesChanged();
 }

@@ -14,6 +14,7 @@ QProcess* HoiFileParser::save(HoiSaveNode *saveNode)
 {
     QString srcPath = saveNode->srcPath();
     QString dstPath = saveNode->filePath();
+    qDebug() << srcPath;
     if(QFileInfo::exists(dstPath)) {
         return nullptr;
     }
@@ -22,6 +23,7 @@ QProcess* HoiFileParser::save(HoiSaveNode *saveNode)
         qDebug() << "mkdir :" << saveFolder.mkpath(saveFolder.path());
     }
     QString copyPath = HoiFileParser::baseDir(srcPath) + "/" + QFileInfo(srcPath).fileName();
+    qDebug() << copyPath;
     if (!QFileInfo::exists(copyPath)) {
         return nullptr;
     }
