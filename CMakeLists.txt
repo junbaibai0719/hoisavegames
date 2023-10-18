@@ -39,7 +39,7 @@ qt_add_resources(apphoisavegames "configuration"
         qtquickcontrols2.conf
 )
 file(COPY 7z DESTINATION ${CMAKE_BINARY_DIR})
-
+file(COPY 7z DESTINATION ${CMAKE_BINARY_DIR}/output)
 # Qt for iOS sets MACOSX_BUNDLE_GUI_IDENTIFIER automatically since Qt 6.1.
 # If you are developing for iOS or macOS you should consider setting an
 # explicit, fixed bundle identifier manually though.
@@ -59,5 +59,5 @@ include(GNUInstallDirs)
 install(TARGETS apphoisavegames
     BUNDLE DESTINATION .
     LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
-    RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+    RUNTIME DESTINATION ${CMAKE_BINARY_DIR}/output
 )
