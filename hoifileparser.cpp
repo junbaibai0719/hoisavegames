@@ -61,7 +61,7 @@ HoiSaveNode* HoiFileParser::parse(const QString &filePath)
         // 不能直接覆盖文件，真滴坑
         QFile::remove(copyPath);
     }
-    qDebug() <<  QFile::copy(filePath, copyPath);
+    qInfo() << "copy file to copy path:" <<  QFile::copy(filePath, copyPath);
     QFile copyfile(copyPath);
     copyfile.open(QFile::OpenModeFlag::ReadOnly);
     QByteArray content = copyfile.read(512);
