@@ -112,7 +112,7 @@ ApplicationWindow {
                         id: fileNameText
                         anchors.centerIn: parent
                         text: modelData.substring(modelData.lastIndexOf(
-                                                      "\\") + 1)
+                                                      "／") + 1)
                     }
                     MouseArea {
                         anchors.fill: parent
