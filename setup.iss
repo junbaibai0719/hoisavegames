@@ -2,7 +2,7 @@
 ; SEE THE DOCUMENTATION FOR DETAILS ON CREATING INNO SETUP SCRIPT FILES!
 
 #define MyAppName "hoiSaveGames"
-#define MyAppVersion "1.0"
+#define MyAppVersion "1.1"
 #define MyAppPublisher "junbaibai"
 #define MyAppURL "https://github.com/junbaibai0719/hoisavegames"
 #define MyAppExeName "apphoisavegames.exe"
