@@ -31,6 +31,7 @@ qt_add_qml_module(apphoisavegames
         datetimeformat.h
         line.h line.cpp
     RESOURCES resources/icon/hoiSaveGamesLogo.ico
+    RESOURCES READMD.md
 )
 
 qt_add_resources(apphoisavegames "configuration"
