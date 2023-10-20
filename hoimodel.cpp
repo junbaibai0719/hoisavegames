@@ -13,6 +13,7 @@ HoiModel::HoiModel(QObject *parent): QAbstractItemModel(parent)
     m_db.open();
     qInfo() << "db is open?:" << m_db.isOpen();
     createTable();
+    m_saving = false;
     m_restoring = false;
     initListeningFiles();
 }
@@ -120,9 +121,15 @@ void HoiModel::initListeningFiles()
 
 void HoiModel::addSaveNodeFromPath(const QString &path)
 {
+    if(saving()) {
+        qInfo() << "is parsing and saving node";
+        return;
+    }
+    setSaving(true);
     HoiSaveNode* savenode = HoiFileParser::parse(path);
     QProcess * process = HoiFileParser::save(savenode);
     QObject::connect(process, &QProcess::finished, process, [ =, this ]() {
+        setSaving(false);
         if(process->exitCode()) {
             qWarning() << QString::fromLocal8Bit(process->readAllStandardError());
             qInfo() << "save failed remove file:" << QDir(savenode->filePath()).remove(savenode->filePath());
@@ -201,6 +208,16 @@ void HoiModel::restore(HoiSaveNode *node)
         };
         setRestoring(false);
     });
+}
+
+bool HoiModel::saving() const
+{
+    return m_saving;
+}
+
+void HoiModel::setSaving(bool newSaving)
+{
+    m_saving = newSaving;
 }
 
 QModelIndex HoiModel::index(int row, int column, const QModelIndex &parent) const

@@ -33,6 +33,7 @@ private:
     QString m_currentFileName;
 
     bool m_restoring;
+    bool m_saving;
 
     QList<QString> m_listeningFiles;
 
@@ -51,6 +52,9 @@ public:
 
     QList<QString> listeningFiles() const;
     void setListeningFiles(const QList<QString> &newListeningFiles);
+
+    bool saving() const;
+    void setSaving(bool newSaving);
 
 signals:
     void currentFileNameChanged();
